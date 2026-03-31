@@ -97,8 +97,8 @@ export default function App() {
           'X-Title': 'AI Sprint Planner',
         },
         body: JSON.stringify({
-          model: 'anthropic/claude-sonnet-4-5',
-          max_tokens: 2000,
+          model: 'google/gemini-2.0-flash-001',
+          max_tokens: 4000,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user', content: userMessage },
@@ -118,8 +118,9 @@ export default function App() {
 
       const data = await response.json()
       const raw = data?.choices?.[0]?.message?.content || ''
-      const cleaned = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim()
-      const parsed = JSON.parse(cleaned)
+      const jsonMatch = raw.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) throw new SyntaxError('No JSON object found in response')
+      const parsed = JSON.parse(jsonMatch[0])
       setResults(parsed)
       setFilters({ sprint: '', priority: '' })
     } catch (err) {
@@ -141,22 +142,24 @@ export default function App() {
   return (
     <>
       <Header />
-      <div id="app-screen">
-        <FormPanel
-          onGenerate={handleGenerate}
-          onChangeKey={handleChangeKey}
-          loading={loading}
-          error={error}
-        />
-        <OutputPanel
-          loading={loading}
-          loadingStep={loadingStep}
-          statusSteps={STATUS_STEPS}
-          results={results}
-          epicTitle={epicTitle}
-          filters={filters}
-          onFilterChange={setFilters}
-        />
+      <div id="app-wrapper">
+        <div id="app-screen">
+          <FormPanel
+            onGenerate={handleGenerate}
+            onChangeKey={handleChangeKey}
+            loading={loading}
+            error={error}
+          />
+          <OutputPanel
+            loading={loading}
+            loadingStep={loadingStep}
+            statusSteps={STATUS_STEPS}
+            results={results}
+            epicTitle={epicTitle}
+            filters={filters}
+            onFilterChange={setFilters}
+          />
+        </div>
       </div>
     </>
   )

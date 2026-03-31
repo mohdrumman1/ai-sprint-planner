@@ -54,7 +54,7 @@ To enable it:
 
 - React 18 + Vite
 - Plain CSS — no UI framework
-- [OpenRouter API](https://openrouter.ai/) — model: `anthropic/claude-sonnet-4-5`
+- [OpenRouter API](https://openrouter.ai/) — model: `nousresearch/hermes-3-llama-3.1-405b:free`
 
 ---
 
