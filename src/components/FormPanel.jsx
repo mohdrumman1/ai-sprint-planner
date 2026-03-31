@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function FormPanel({ onGenerate, onChangeKey, loading, error }) {
+export default function FormPanel({ onGenerate, loading, error }) {
   const [epicTitle, setEpicTitle] = useState('')
   const [epicDesc, setEpicDesc] = useState('')
   const [teamSize, setTeamSize] = useState('')
@@ -91,10 +91,6 @@ export default function FormPanel({ onGenerate, onChangeKey, loading, error }) {
         Generate Sprint Plan
       </button>
 
-      <div className="key-change">
-        Using the wrong key?{' '}
-        <a onClick={onChangeKey}>Change API Key</a>
-      </div>
     </aside>
   )
 }

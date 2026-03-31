@@ -1,8 +1,9 @@
 import React, { useState } from 'react'
-import ApiKeyScreen from './components/ApiKeyScreen'
 import Header from './components/Header'
 import FormPanel from './components/FormPanel'
 import OutputPanel from './components/OutputPanel'
+
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || ''
 
 const STATUS_STEPS = [
   'Parsing your epic...',
@@ -41,31 +42,13 @@ Respond ONLY with a valid JSON object (no markdown fences, no extra text) with t
   ]
 }`
 
-function getInitialKey() {
-  if (typeof window !== 'undefined' && window.FORMA_API_KEY) return window.FORMA_API_KEY
-  return sessionStorage.getItem('forma_api_key') || ''
-}
-
 export default function App() {
-  const [apiKey, setApiKey] = useState(getInitialKey)
   const [loading, setLoading] = useState(false)
   const [loadingStep, setLoadingStep] = useState(0)
   const [error, setError] = useState(null)
   const [results, setResults] = useState(null)
   const [epicTitle, setEpicTitle] = useState('')
   const [filters, setFilters] = useState({ sprint: '', priority: '' })
-
-  const isAuthenticated = apiKey.startsWith('sk-')
-
-  function handleApiKeySubmit(key) {
-    setApiKey(key)
-    sessionStorage.setItem('forma_api_key', key)
-  }
-
-  function handleChangeKey() {
-    setApiKey('')
-    sessionStorage.removeItem('forma_api_key')
-  }
 
   async function handleGenerate(formData) {
     const { epicTitle: title, epicDesc, teamSize, sprintLen, techStack } = formData
@@ -88,14 +71,9 @@ export default function App() {
     }, 1600)
 
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch(WORKER_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`,
-          'HTTP-Referer': 'https://mohdrumman1.github.io/ai-sprint-planner/',
-          'X-Title': 'AI Sprint Planner',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model: 'google/gemini-2.0-flash-001',
           max_tokens: 4000,
@@ -135,10 +113,6 @@ export default function App() {
     }
   }
 
-  if (!isAuthenticated) {
-    return <ApiKeyScreen onSubmit={handleApiKeySubmit} />
-  }
-
   return (
     <>
       <Header />
@@ -146,7 +120,6 @@ export default function App() {
         <div id="app-screen">
           <FormPanel
             onGenerate={handleGenerate}
-            onChangeKey={handleChangeKey}
             loading={loading}
             error={error}
           />
